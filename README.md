@@ -1,4 +1,4 @@
-### Hi there 👋
+### Open Source Software Engineering Assignment 3
 
 <!--
 **damini-niranjan/damini-niranjan** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
