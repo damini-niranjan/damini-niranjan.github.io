@@ -1,0 +1,71 @@
+window.addEventListener('load', () => {
+    fillSidebarMenu()
+})
+window.addEventListener('resize', checkSidebarMenuVisibility)
+document.addEventListener('DOMContentLoaded', documentInitialized)
+
+function fillSidebarMenu () {
+
+    if (page.url === '/')  return
+
+    const url = site.baseurl + page.url //.replace(/\/$/,'')
+    const menu = [ ... document.querySelectorAll ('header.sidebar > ul > li > a') ]
+    const link = menu.find (a => url.startsWith(a.pathname))
+    // if (!link) debugger
+    if (!link) return
+
+    link.classList.add('selected')
+
+    if (link.pathname !== url) {
+        const label = page.shorty || page.label || page.title
+        link.innerHTML = (link.dataset.shorty || link.innerHTML) + '<span class="display:inline-block" onclick="_2top(event)"> &#9656; ' + label + '</span>'
+        window._2top = (event)=>{
+            event.preventDefault()
+            window.scrollTo(0, 0)
+        }
+    }
+
+    const toc = document.querySelectorAll('.sidebar.menu > li a, .sidebar.menu > dt > a')
+    if (toc.length) {
+        const ul = document.createElement ('ul')
+        for (let each of toc) {
+
+            const target = each.hash && document.getElementById (each.hash.slice(1))
+            if (target && target.classList.contains('no-menu')) continue
+
+            // include nested <li> items if they have the label property specified
+            const sublist = each.parentElement.parentElement
+            if (!sublist.classList.contains('menu') && ( !target || !target.attributes.label ))  continue
+
+            // prepare the new <li>+<a> elements
+            const li = document.createElement('li')
+            const a = each.cloneNode(true)
+            li.appendChild (a)
+
+            // handle .toc-redirect entries
+            if (target) {
+                const link = target && target.firstElementChild
+                if (link && link.classList.contains('toc-redirect'))  a.href = each.href = link.href
+                else if (target.classList.contains('toc-redirect'))  a.href = each.href = target.lastElementChild.href
+            }
+
+            // handle label attributes in link or target
+            const label = each.attributes.label || target && target.attributes.label
+            if (label) {
+                if (label.value === 'yes') ;
+                else if (label.value === '>')  a.innerHTML = '&nbsp;<i>&#8627 </i> &nbsp; ' + a.innerHTML
+                else if (label.value === '-')  a.innerHTML = '&nbsp;&ndash;&nbsp; ' + a.innerHTML
+                else a.innerHTML = label.value
+            }
+
+            // insert a new <li> element
+            ul.appendChild (li)
+        }
+        link.parentElement.appendChild (ul)
+        if (ul.scrollIntoViewIfNeeded)  ul.scrollIntoViewIfNeeded()
+        else  ul.scrollIntoView() // IE
+    }
+
+    registerScrollSelector()
+    markStatus()
+}
